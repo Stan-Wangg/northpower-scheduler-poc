@@ -122,12 +122,22 @@ with left:
     with st.form("schedule_form", clear_on_submit=False):
         col1, col2 = st.columns([1, 1])
         with col1:
-            work_order_number = st.text_input("Work Order Number", value="TC4216033")
-            customer = st.text_input("Customer", value="VEC")
-            project_manager = st.text_input("Project manager", value="John Donald")
-        with col2:
-            work_type = st.text_input("Work Type", value="Capital - Non Contestable")
-            job_description = st.text_area("Job Description", value="Residential Subdivision work. Milldale 7A.", height=80)
+        work_order_number = st.text_input("Work Order Number", value="TC4216033")
+
+        # 👇 Combine Customer + Work Type here
+        customer_work_type = st.text_input(
+            "Customer / Work Type",
+            value="VEC - Capital - Non Contestable"
+        )
+
+        project_manager = st.text_input("Project manager", value="John Donald")
+
+    with col2:
+        job_description = st.text_area(
+            "Job Description",
+            value="Residential Subdivision work. Milldale 7A.",
+            height=80
+        )
 
         st.markdown("**Task & status**")
         task_information = st.text_area("Task information", value="Cabling/Installing Tuds/Jointing", height=70)
