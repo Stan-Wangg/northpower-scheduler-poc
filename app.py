@@ -1,6 +1,5 @@
-# app.py — Frontend-only Daily Scheduler (POC)
+# app.py — Frontend-only Daily Scheduler (POC) with Northpower branding
 # --------------------------------------------------
-# No backend required. Runs in memory with JSON import/export.
 # Requirements: streamlit, pandas
 # How to run locally:
 #   pip install streamlit pandas
@@ -8,31 +7,54 @@
 
 from __future__ import annotations
 import json
-from datetime import date, timedelta
-from typing import List, Dict, Any
-
+from datetime import date
+from typing import Dict, Any
 import pandas as pd
 import streamlit as st
 
+# -----------------------------
+# Page setup
+# -----------------------------
 st.set_page_config(page_title="Northpower • Daily Scheduler (POC)", layout="wide")
+
+# Inject custom CSS for brand styling
+st.markdown(
+    """
+    <style>
+    /* Main title */
+    .css-10trblm {
+        color: #F05A28 !important;
+        font-weight: 700 !important;
+    }
+    /* Button */
+    div.stButton > button:first-child {
+        background-color: #F05A28;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #d94e21;
+        color: white;
+    }
+    /* Labels */
+    label {
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # -----------------------------
 # Session state bootstrapping
 # -----------------------------
 if "schedules" not in st.session_state:
     st.session_state.schedules: Dict[str, Dict[str, Any]] = {}
-if "employees_df" not in st.session_state:
-    st.session_state.employees_df = pd.DataFrame([
-        {"EMPLOYEE_ID":"E-SAMG","EMPLOYEE_NAME":"Sam G","ROLE_CODE":"FLM","BUSINESS_UNIT":"DWW","STATUS":"ACTIVE"},
-        {"EMPLOYEE_ID":"E-CHRISB","EMPLOYEE_NAME":"Chris B","ROLE_CODE":"LM","BUSINESS_UNIT":"DWW","STATUS":"ACTIVE"},
-        {"EMPLOYEE_ID":"E-JAKEA","EMPLOYEE_NAME":"Jake A","ROLE_CODE":"LM","BUSINESS_UNIT":"DWW","STATUS":"ACTIVE"},
-        {"EMPLOYEE_ID":"E-ETHANP","EMPLOYEE_NAME":"Ethan P","ROLE_CODE":"TRLM","BUSINESS_UNIT":"DWW","STATUS":"ACTIVE"},
-    ])
-if "prefill_resources" not in st.session_state:
-    st.session_state.prefill_resources = None
 
 # -----------------------------
-# Dropdown Options
+# Options
 # -----------------------------
 BUSINESS_UNITS = ["DTS", "DDS", "DAR", "DWW", "DCN", "DES", "DRM"]
 
@@ -94,15 +116,10 @@ def schedule_id_for(work_order: str, sched_date: date) -> str:
 # -----------------------------
 # UI
 # -----------------------------
-st.title("📅 Daily Scheduler (POC)")
+st.title("📅 Northpower Daily Scheduler (POC)")
 
 selected_date = st.date_input("Select schedule date", value=date.today())
-selected_bu = st.selectbox(
-    "Business Unit (required)",
-    BUSINESS_UNITS,
-    index=None,
-    placeholder="Select..."
-)
+selected_bu = st.selectbox("Business Unit", BUSINESS_UNITS, index=None, placeholder="Select...")
 
 with st.form("schedule_form", clear_on_submit=False):
     col1, col2 = st.columns([1, 1])
@@ -123,11 +140,7 @@ with st.form("schedule_form", clear_on_submit=False):
         )
 
     with col2:
-        job_description = st.text_area(
-            "Job Description (required)",
-            value="",
-            height=80
-        )
+        job_description = st.text_area("Job Description (required)", value="", height=80)
 
     st.markdown("**Task & Status**")
     task_information = st.text_area("Task Information (required)", value="", height=70)
@@ -151,7 +164,6 @@ with st.form("schedule_form", clear_on_submit=False):
             "Hours per resource (required)",
             min_value=0.5,
             max_value=24.0,
-            value=None,
             step=0.5,
             format="%.1f"
         )
@@ -169,8 +181,6 @@ with st.form("schedule_form", clear_on_submit=False):
 # -----------------------------
 if left_submit:
     missing_fields = []
-    if not selected_bu:
-        missing_fields.append("Business Unit")
     if not work_order_number.strip():
         missing_fields.append("Work Order Number")
     if not customer_work_type:
@@ -185,8 +195,10 @@ if left_submit:
         missing_fields.append("Project Status")
     if not resources_booked:
         missing_fields.append("Resources Booked")
-    if hours_per_resource is None:
+    if not hours_per_resource:
         missing_fields.append("Hours per Resource")
+    if not selected_bu:
+        missing_fields.append("Business Unit")
 
     if missing_fields:
         st.error(f"⚠️ Please fill in all required fields: {', '.join(missing_fields)}")
@@ -206,7 +218,6 @@ if left_submit:
             "hours_per_resource": float(hours_per_resource),
             "status": schedule_status,
             "notes": notes,
-            "resources": []
         }
         st.session_state.schedules[sid] = payload
         st.success("✅ Schedule saved in memory (POC).")
