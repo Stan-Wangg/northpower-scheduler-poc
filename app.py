@@ -1,14 +1,14 @@
-# app.py — Daily Scheduler (POC) + Calendar View
-# --------------------------------------------------
+# app.py — Daily Scheduler (POC) + Calendar View (placeholder detail)
+# -------------------------------------------------------------------
 # Runs in memory with JSON import/export.
 # Requirements: streamlit, pandas
-# Optional branding: .streamlit/config.toml with your theme.
+# Optional branding: add .streamlit/config.toml (theme) in your repo.
 
 from __future__ import annotations
 import json
 from calendar import monthrange
 from datetime import date, datetime, timedelta
-from typing import List, Dict, Any
+from typing import Dict, Any
 
 import pandas as pd
 import streamlit as st
@@ -18,7 +18,7 @@ import streamlit as st
 # -----------------------------------
 st.set_page_config(page_title="Northpower • Daily Scheduler (POC)", layout="wide")
 
-# (Optional) small CSS polish for buttons/headers with brand orange #F05A28
+# (Optional) small CSS polish for brand orange #F05A28
 st.markdown(
     """
     <style>
@@ -86,11 +86,6 @@ def month_days(year: int, month: int):
     while cur <= end:
         yield cur
         cur += timedelta(days=1)
-
-def schedules_for_iso(iso_d: str):
-    """List of schedule dicts for a given YYYY-MM-DD."""
-    return [rec for rec in st.session_state.schedules.values()
-            if rec.get("schedule_date") == iso_d]
 
 # -----------------------------------
 # Tabs: Scheduler | Calendar
@@ -207,7 +202,7 @@ with tab_sched:
             st.success("✅ Schedule saved in memory (POC).")
 
 # ===================================
-# TAB: Calendar (Option A)
+# TAB: Calendar (Option A with placeholder detail)
 # ===================================
 with tab_cal:
     st.subheader("Calendar overview")
@@ -262,34 +257,9 @@ with tab_cal:
                 selected_day = iso_d
 
     st.markdown("---")
-    # Detail panel
+    # Detail panel — placeholder for now
     if selected_day and selected_day.startswith(f"{yyyy:04d}-{mm:02d}-"):
-        day_list = schedules_for_iso(selected_day)
-        st.subheader(f"Schedules for {selected_day} ({len(day_list)})")
-        if not day_list:
-            st.info("No schedules for this day.")
-        else:
-            rows = []
-            for rec in day_list:
-                bu = rec.get("business_unit","")
-                wo = rec.get("work_order_number","")
-                cwt = rec.get("customer_work_type","")
-                pm = rec.get("project_manager","")
-                stat = rec.get("project_status","")
-                hrs = rec.get("hours_per_resource", None)
-                notes = rec.get("notes","")
-                booked = rec.get("resources_booked", [])
-                if booked:
-                    for b in booked:
-                        rows.append({
-                            "BU": bu, "Work Order": wo, "Customer / Work Type": cwt,
-                            "PM": pm, "Status": stat, "Booked": b, "Hrs/Res": hrs, "Notes": notes
-                        })
-                else:
-                    rows.append({
-                        "BU": bu, "Work Order": wo, "Customer / Work Type": cwt,
-                        "PM": pm, "Status": stat, "Booked": "—", "Hrs/Res": hrs, "Notes": notes
-                    })
-            st.dataframe(pd.DataFrame(rows), use_container_width=True)
+        st.subheader(f"Schedules for {selected_day}")
+        st.write("Null")   # <<< Placeholder as requested
     else:
         st.info("Select a day in the grid to see details.")
