@@ -1,0 +1,6 @@
+[theme]
+primaryColor="#F05A28"        # Northpower Orange
+backgroundColor="#2F2F2F"     # Dark Grey background
+secondaryBackgroundColor="#3C3C3C"
+textColor="#FFFFFF"           # White text
+font="sans serif"
