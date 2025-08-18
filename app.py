@@ -31,7 +31,10 @@ if "employees_df" not in st.session_state:
 if "prefill_resources" not in st.session_state:
     st.session_state.prefill_resources = None
 
-BUSINESS_UNITS = ["DWW", "Connections", "Lines", "Civil", "Faults"]
+# -----------------------------
+# Dropdown Options
+# -----------------------------
+BUSINESS_UNITS = ["DTS", "DDS", "DAR", "DWW", "DCN", "DES", "DRM"]
 
 PROJECT_MANAGER_OPTIONS = ["John Donald", "Lyndon Connolly", "Neil Jones"]
 
@@ -94,7 +97,12 @@ def schedule_id_for(work_order: str, sched_date: date) -> str:
 st.title("📅 Daily Scheduler (POC)")
 
 selected_date = st.date_input("Select schedule date", value=date.today())
-selected_bu = st.selectbox("Business Unit", BUSINESS_UNITS)
+selected_bu = st.selectbox(
+    "Business Unit (required)",
+    BUSINESS_UNITS,
+    index=None,
+    placeholder="Select..."
+)
 
 with st.form("schedule_form", clear_on_submit=False):
     col1, col2 = st.columns([1, 1])
@@ -161,6 +169,8 @@ with st.form("schedule_form", clear_on_submit=False):
 # -----------------------------
 if left_submit:
     missing_fields = []
+    if not selected_bu:
+        missing_fields.append("Business Unit")
     if not work_order_number.strip():
         missing_fields.append("Work Order Number")
     if not customer_work_type:
