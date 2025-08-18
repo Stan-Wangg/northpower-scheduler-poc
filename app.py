@@ -32,8 +32,25 @@ if "prefill_resources" not in st.session_state:
     st.session_state.prefill_resources = None
 
 BUSINESS_UNITS = ["DWW", "Connections", "Lines", "Civil", "Faults"]
-PROJECT_STATUS_OPTIONS = ["Scheduled", "De-energised", "Energised", "On Hold", "Cancelled", "Completed"]
+
+PROJECT_MANAGER_OPTIONS = ["John Donald", "Lyndon Connolly", "Neil Jones"]
+
+PROJECT_STATUS_OPTIONS = [
+    "Live Line",
+    "Shut Down HV",
+    "Shut Down LV",
+    "De-energised",
+    "Subcontractor only",
+    "Tentative",
+    "Unplanned",
+    "Training",
+    "9 Hr Break",
+    "Leave",
+    "Planning - Office based"
+]
+
 SCHEDULE_STATUS = ["SCHEDULED", "CANCELLED", "COMPLETED"]
+
 CUSTOMER_WORK_TYPE_OPTIONS = [
     "VEC - CIW CSUB",
     "VEC - CIW SUBDV",
@@ -45,6 +62,24 @@ CUSTOMER_WORK_TYPE_OPTIONS = [
     "Leave",
     "Non Charge",
     "Training",
+]
+
+RESOURCES_BOOKED_OPTIONS = [
+    "Callum Mc - LM",
+    "Carlo D - TRLM",
+    "Chris B - LM",
+    "Ethan P - TRLM",
+    "Howard C - FLM",
+    "Jake A - LM",
+    "Joel G - LM",
+    "John C - TRLM",
+    "Luke B - LM",
+    "Mack I - GB LM",
+    "Mike I - FLM",
+    "Poutama LE - TRLM",
+    "Sam G - FLM",
+    "Steve R - SU",
+    "Toby E - TRLM"
 ]
 
 # -----------------------------
@@ -72,7 +107,12 @@ with st.form("schedule_form", clear_on_submit=False):
             index=None,
             placeholder="Select..."
         )
-        project_manager = st.text_input("Project Manager (required)", value="")
+        project_manager = st.selectbox(
+            "Project Manager (required)",
+            PROJECT_MANAGER_OPTIONS,
+            index=None,
+            placeholder="Select..."
+        )
 
     with col2:
         job_description = st.text_area(
@@ -86,9 +126,18 @@ with st.form("schedule_form", clear_on_submit=False):
 
     c1, c2, c3 = st.columns([1, 1, 1])
     with c1:
-        project_status = st.selectbox("Project Status (required)", PROJECT_STATUS_OPTIONS, index=None, placeholder="Select status")
+        project_status = st.selectbox(
+            "Project Status (required)",
+            PROJECT_STATUS_OPTIONS,
+            index=None,
+            placeholder="Select status"
+        )
     with c2:
-        resources_booked_desc = st.text_input("Resources Booked (required)", value="")
+        resources_booked = st.multiselect(
+            "Resources Booked (required)",
+            RESOURCES_BOOKED_OPTIONS,
+            default=[]
+        )
     with c3:
         hours_per_resource = st.number_input(
             "Hours per resource (required)",
@@ -118,13 +167,13 @@ if left_submit:
         missing_fields.append("Customer / Work Type")
     if not job_description.strip():
         missing_fields.append("Job Description")
-    if not project_manager.strip():
+    if not project_manager:
         missing_fields.append("Project Manager")
     if not task_information.strip():
         missing_fields.append("Task Information")
     if not project_status:
         missing_fields.append("Project Status")
-    if not resources_booked_desc.strip():
+    if not resources_booked:
         missing_fields.append("Resources Booked")
     if hours_per_resource is None:
         missing_fields.append("Hours per Resource")
@@ -143,7 +192,7 @@ if left_submit:
             "project_manager": project_manager,
             "task_information": task_information,
             "project_status": project_status,
-            "resources_booked_desc": resources_booked_desc,
+            "resources_booked": resources_booked,
             "hours_per_resource": float(hours_per_resource),
             "status": schedule_status,
             "notes": notes,
