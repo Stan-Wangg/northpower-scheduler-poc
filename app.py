@@ -257,9 +257,55 @@ with tab_cal:
                 selected_day = iso_d
 
     st.markdown("---")
-    # Detail panel — placeholder for now
-    if selected_day and selected_day.startswith(f"{yyyy:04d}-{mm:02d}-"):
-        st.subheader(f"Schedules for {selected_day}")
-        st.write("Null")   # <<< Placeholder as requested
+# Detail panel — show scheduled resources for the selected day
+if selected_day:
+    # Gather all schedules for the clicked date
+    day_list = [
+        rec for rec in st.session_state.schedules.values()
+        if rec.get("schedule_date") == selected_day
+    ]
+
+    st.subheader(f"Schedules for {selected_day} ({len(day_list)})")
+
+    if not day_list:
+        st.info("No schedules for this day.")
     else:
-        st.info("Select a day in the grid to see details.")
+        rows = []
+        for rec in day_list:
+            bu   = rec.get("business_unit", "")
+            wo   = rec.get("work_order_number", "")
+            cwt  = rec.get("customer_work_type", "")
+            pm   = rec.get("project_manager", "")
+            stat = rec.get("project_status", "")
+            hrs  = rec.get("hours_per_resource", None)
+            notes = rec.get("notes", "")
+            booked = rec.get("resources_booked", []) or []
+
+            # One row per resource booked; fallback to a single row if none
+            if booked:
+                for person in booked:
+                    rows.append({
+                        "BU": bu,
+                        "Work Order": wo,
+                        "Customer / Work Type": cwt,
+                        "PM": pm,
+                        "Status": stat,
+                        "Resource": person,
+                        "Hrs/Res": hrs,
+                        "Notes": notes
+                    })
+            else:
+                rows.append({
+                    "BU": bu,
+                    "Work Order": wo,
+                    "Customer / Work Type": cwt,
+                    "PM": pm,
+                    "Status": stat,
+                    "Resource": "—",
+                    "Hrs/Res": hrs,
+                    "Notes": notes
+                })
+
+        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+else:
+    st.info("Select a day in the grid to see details.")
