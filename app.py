@@ -34,6 +34,18 @@ if "prefill_resources" not in st.session_state:
 BUSINESS_UNITS = ["DWW", "Connections", "Lines", "Civil", "Faults"]
 PROJECT_STATUS_OPTIONS = ["Scheduled", "De-energised", "Energised", "On Hold", "Cancelled", "Completed"]
 SCHEDULE_STATUS = ["SCHEDULED", "CANCELLED", "COMPLETED"]
+CUSTOMER_WORK_TYPE_OPTIONS = [
+    "VEC - CIW CSUB",
+    "VEC - CIW SUBDV",
+    "VEC - Asset replacment",
+    "VEC - Capital Contestable",
+    "VEC - Capital - Non Contestable",
+    "VEC - Streetlights",
+    "Non VECTOR Customer Works",
+    "Leave",
+    "Non Charge",
+    "Training",
+]
 
 # -----------------------------
 # Helpers
@@ -118,10 +130,11 @@ with left:
 
         with col1:
             work_order_number = st.text_input("Work Order Number", value="TC4216033")
-            # Combined field
-            customer_work_type = st.text_input(
-                "Customer / Work Type",
-                value="VEC - Capital - Non Contestable"
+            customer_work_type = st.selectbox(
+                "Customer / Work Type (required)",
+                CUSTOMER_WORK_TYPE_OPTIONS,
+                index=None,
+                placeholder="Select..."
             )
             project_manager = st.text_input("Project manager", value="John Donald")
 
@@ -204,6 +217,8 @@ if copy_prev and 'work_order_number' in locals() and work_order_number:
 if left_submit or right_save:
     if not work_order_number:
         st.error("Work Order Number is required.")
+    elif not customer_work_type:
+        st.error("Customer / Work Type is required.")
     else:
         sid = schedule_id_for(work_order_number, selected_date)
         payload: Dict[str, Any] = {
@@ -211,7 +226,6 @@ if left_submit or right_save:
             "schedule_date": selected_date.isoformat(),
             "business_unit": selected_bu,
             "work_order_number": work_order_number,
-            # store combined string
             "customer_work_type": customer_work_type,
             "job_description": job_description,
             "project_manager": project_manager,
@@ -274,7 +288,7 @@ with st.expander("Developer mapping notes"):
     st.markdown(
         """
         **Fields captured**:
-        - Work order: work_order_number, customer_work_type (combined), job_description, project_manager
+        - Work order: work_order_number, customer_work_type (dropdown), job_description, project_manager
         - Daily schedule: schedule_id, schedule_date, business_unit, task_information, project_status,
           resources_booked_desc, hours_per_resource, status, notes
         - Assigned resources: employee_id/name, role_code, booked_hours (one row per person)
